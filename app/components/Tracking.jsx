@@ -20,8 +20,7 @@ export function trackProductViewed(product, storefrontUrl) {
   )
 }
 
-
-export function trackAddedToCart(cart, storefrontUrl) {
+export function trackCartUpdated(cart, storefrontUrl) {
   let braze = window.braze || [];
   const eventData = {
     cart_id: cart.id,
@@ -45,8 +44,7 @@ export function trackAddedToCart(cart, storefrontUrl) {
     source: storefrontUrl,
     metadata: {},
   };
-  console.log(eventData.products.length)
-  console.log(storefrontUrl)
+  
   braze.logCustomEvent(
     "ecommerce.cart_updated",
     eventData 

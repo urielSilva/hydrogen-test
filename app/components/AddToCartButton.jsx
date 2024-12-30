@@ -1,5 +1,7 @@
 import {CartForm} from '@shopify/hydrogen';
-import { trackAddedToCart } from '~/components/Tracking';
+import { trackCartUpdated } from '~/components/Tracking';
+import { useEffect } from 'react';
+import { useFetcher } from '@remix-run/react';
 
 /**
  * @param {{
@@ -17,12 +19,18 @@ export function AddToCartButton({
   lines,
   onClick,
 }) {
+
+  const fetcher = useFetcher({ key: "add-to-cart-fetcher" });
+
+  useEffect(() => {
+    if(fetcher.state === "idle" && fetcher.data) {
+      trackCartUpdated(fetcher.data.updatedCart, fetcher.data.storefrontUrl)
+    }
+  }, [fetcher.state, fetcher.data])
+
   return (
-    <CartForm route="/cart" inputs={{lines}} action={CartForm.ACTIONS.LinesAdd}>
+    <CartForm route="/cart" inputs={{lines}} fetcherKey="add-to-cart-fetcher" action={CartForm.ACTIONS.LinesAdd}>
       {(fetcher) => {
-        if(fetcher.data) {
-          trackAddedToCart(fetcher.data.updatedCart, fetcher.data.storefrontUrl)
-        }
         return (
           <>
           <input
