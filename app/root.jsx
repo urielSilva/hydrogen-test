@@ -1,4 +1,5 @@
-import {useNonce, getShopAnalytics, Analytics} from '@shopify/hydrogen';
+import {useNonce, getShopAnalytics, Analytics, Script} from '@shopify/hydrogen';
+import { useEffect } from 'react';
 import {defer} from '@shopify/remix-oxygen';
 import {
   Links,
@@ -69,6 +70,8 @@ export async function loader(args) {
     ...deferredData,
     ...criticalData,
     publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
+    brazeApiKey: env.BRAZE_API_KEY,
+    brazeApiUrl: env.BRAZE_API_URL,
     shop: getShopAnalytics({
       storefront,
       publicStorefrontId: env.PUBLIC_STOREFRONT_ID,
@@ -141,6 +144,13 @@ export function Layout({children}) {
   const nonce = useNonce();
   /** @type {RootLoader} */
   const data = useRouteLoaderData('root');
+  useEffect(() => {
+    braze.initialize(data.brazeApiKey, {
+      baseUrl: data.brazeApiUrl,
+      enableLogging: true,
+    });
+    braze.openSession()
+  }, [])
 
   return (
     <html lang="en">
@@ -162,6 +172,7 @@ export function Layout({children}) {
         ) : (
           children
         )}
+        <Script async type="text/javascript" src="https://js.appboycdn.com/web-sdk/5.6/braze.min.js" />
         <ScrollRestoration nonce={nonce} />
         <Scripts nonce={nonce} />
       </body>

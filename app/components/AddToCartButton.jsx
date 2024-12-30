@@ -1,4 +1,5 @@
 import {CartForm} from '@shopify/hydrogen';
+import { trackAddedToCart } from '~/components/Tracking';
 
 /**
  * @param {{
@@ -18,8 +19,12 @@ export function AddToCartButton({
 }) {
   return (
     <CartForm route="/cart" inputs={{lines}} action={CartForm.ACTIONS.LinesAdd}>
-      {(fetcher) => (
-        <>
+      {(fetcher) => {
+        if(fetcher.data) {
+          trackAddedToCart(fetcher.data.updatedCart, fetcher.data.storefrontUrl)
+        }
+        return (
+          <>
           <input
             name="analytics"
             type="hidden"
@@ -33,7 +38,9 @@ export function AddToCartButton({
             {children}
           </button>
         </>
-      )}
+        )
+        
+      }}
     </CartForm>
   );
 }
