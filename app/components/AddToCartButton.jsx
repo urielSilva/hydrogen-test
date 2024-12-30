@@ -1,5 +1,5 @@
 import {CartForm} from '@shopify/hydrogen';
-import { trackCartUpdated } from '~/components/Tracking';
+import { trackCartUpdated, setCartToken } from '~/components/Tracking';
 import { useEffect } from 'react';
 import { useFetcher } from '@remix-run/react';
 
@@ -25,6 +25,7 @@ export function AddToCartButton({
   useEffect(() => {
     if(fetcher.state === "idle" && fetcher.data) {
       trackCartUpdated(fetcher.data.updatedCart, fetcher.data.storefrontUrl)
+      setCartToken(fetcher.data.updatedCart);
     }
   }, [fetcher.state, fetcher.data])
 

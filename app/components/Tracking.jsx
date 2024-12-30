@@ -50,3 +50,19 @@ export function trackCartUpdated(cart, storefrontUrl) {
     eventData 
   )
 }
+
+export function setCartToken(cart) {
+  const cartId = cart.id.substring(cart.id.lastIndexOf('/') + 1) 
+  const cartToken = cartId.substring(0, cartId.indexOf("?key="));
+  if (cartToken) {
+    const cartSessionKey = `ab.shopify.shopify_cart_${cartToken}`;
+    const alreadySetCartToken = sessionStorage.getItem(cartSessionKey);
+
+    console.log(alreadySetCartToken)
+    if (!alreadySetCartToken) {
+      braze.getUser().addAlias("shopify_cart_token", `shopify_cart_${cartToken}`)
+      braze.requestImmediateDataFlush();
+      sessionStorage.setItem(cartSessionKey, cartToken);
+    }
+  }
+}
