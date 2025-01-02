@@ -31,9 +31,8 @@ export function AddToCartButton({
 
   return (
     <CartForm route="/cart" inputs={{lines}} fetcherKey="add-to-cart-fetcher" action={CartForm.ACTIONS.LinesAdd}>
-      {(fetcher) => {
-        return (
-          <>
+      {(fetcher) => (
+        <>
           <input
             name="analytics"
             type="hidden"
@@ -47,9 +46,7 @@ export function AddToCartButton({
             {children}
           </button>
         </>
-        )
-        
-      }}
+      )}
     </CartForm>
   );
 }
