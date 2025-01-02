@@ -2,6 +2,12 @@
 export const CUSTOMER_FRAGMENT = `#graphql
   fragment Customer on Customer {
     id
+    emailAddress {
+      emailAddress
+    }
+    phoneNumber {
+      phoneNumber
+    }
     firstName
     lastName
     defaultAddress {

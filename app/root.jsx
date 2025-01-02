@@ -1,4 +1,5 @@
-import {useNonce, getShopAnalytics, Analytics} from '@shopify/hydrogen';
+import {useNonce, getShopAnalytics, Analytics, Script} from '@shopify/hydrogen';
+import { useEffect } from 'react';
 import {defer} from '@shopify/remix-oxygen';
 import {
   Links,
@@ -16,6 +17,7 @@ import appStyles from '~/styles/app.css?url';
 import tailwindCss from './styles/tailwind.css?url';
 import {PageLayout} from '~/components/PageLayout';
 import {FOOTER_QUERY, HEADER_QUERY} from '~/lib/fragments';
+import {CUSTOMER_DETAILS_QUERY} from '~/graphql/customer-account/CustomerDetailsQuery';
 
 /**
  * This is important to avoid re-fetching root queries on sub-navigations
@@ -65,10 +67,24 @@ export async function loader(args) {
 
   const {storefront, env} = args.context;
 
+  const isLoggedIn = await deferredData.isLoggedIn;
+  let customerData;
+  if (isLoggedIn) {
+    const { data, errors } = await args.context.customerAccount.query(
+        CUSTOMER_DETAILS_QUERY,
+    );
+    customerData = data.customer
+  } else {
+    customerData = {}
+  }
+
   return defer({
     ...deferredData,
     ...criticalData,
     publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
+    brazeApiKey: env.BRAZE_API_KEY,
+    brazeApiUrl: env.BRAZE_API_URL,
+    customerData: customerData,
     shop: getShopAnalytics({
       storefront,
       publicStorefrontId: env.PUBLIC_STOREFRONT_ID,
@@ -141,6 +157,30 @@ export function Layout({children}) {
   const nonce = useNonce();
   /** @type {RootLoader} */
   const data = useRouteLoaderData('root');
+  
+  useEffect(() => {
+    braze.initialize(data.brazeApiKey, {
+      baseUrl: data.brazeApiUrl,
+      enableLogging: true,
+    });
+    braze.openSession()
+    
+    data.isLoggedIn.then((isLoggedIn) => {
+      console.log(data.customerData)
+      console.log(isLoggedIn)
+      if(isLoggedIn) {
+        const user = braze.getUser()
+        console.log(data.customerData)
+        user.setCustomerIdExternalId(data.customerData.id);
+        user.setFirstName(data.customerData.firstName);
+        user.setLastName(data.customerData.lastName);
+        user.setEmail(data.customerData.emailAddress.emailAddress);
+        user.setPhoneNumber(data.customerData.phoneNumber.phoneNumber);
+      }
+    })
+  }, [])
+
+  
 
   return (
     <html lang="en">
@@ -162,6 +202,7 @@ export function Layout({children}) {
         ) : (
           children
         )}
+        <Script async type="text/javascript" src="https://js.appboycdn.com/web-sdk/5.6/braze.min.js" />
         <ScrollRestoration nonce={nonce} />
         <Scripts nonce={nonce} />
       </body>

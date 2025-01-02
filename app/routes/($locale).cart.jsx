@@ -73,6 +73,7 @@ export async function action({request, context}) {
 
   const cartId = result?.cart?.id;
   const headers = cartId ? cart.setCartId(result.cart.id) : new Headers();
+  const updatedCart = await cart.get()
   const {cart: cartResult, errors, warnings} = result;
 
   const redirectTo = formData.get('redirectTo') ?? null;
@@ -84,6 +85,8 @@ export async function action({request, context}) {
   return json(
     {
       cart: cartResult,
+      updatedCart,
+      storefrontUrl: context.env.PUBLIC_STORE_DOMAIN,
       errors,
       warnings,
       analytics: {

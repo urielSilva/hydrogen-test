@@ -11,6 +11,8 @@ import {
 import {ProductPrice} from '~/components/ProductPrice';
 import {ProductImage} from '~/components/ProductImage';
 import {ProductForm} from '~/components/ProductForm';
+import { trackProductViewed } from '~/components/Tracking';
+import { useEffect } from "react";
 
 /**
  * @type {MetaFunction<typeof loader>}
@@ -64,6 +66,7 @@ async function loadCriticalData({context, params, request}) {
 
   return {
     product,
+    storefrontUrl: context.env.PUBLIC_STORE_DOMAIN,
   };
 }
 
@@ -76,13 +79,15 @@ async function loadCriticalData({context, params, request}) {
 function loadDeferredData({context, params}) {
   // Put any API calls that is not critical to be available on first page render
   // For example: product reviews, product recommendations, social feeds.
-
+  
   return {};
 }
 
 export default function Product() {
   /** @type {LoaderReturnData} */
-  const {product} = useLoaderData();
+  const {product, storefrontUrl} = useLoaderData();
+
+
 
   // Optimistically selects a variant with given available variant information
   const selectedVariant = useOptimisticVariant(
@@ -90,6 +95,9 @@ export default function Product() {
     getAdjacentAndFirstAvailableVariants(product),
   );
 
+  useEffect(() => {
+    trackProductViewed(product, storefrontUrl)
+  }, [])
   // Sets the search param to the selected variant without navigation
   // only when no search params are set in the url
   useSelectedOptionInUrlParam(selectedVariant.selectedOptions);
