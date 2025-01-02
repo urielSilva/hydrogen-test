@@ -169,13 +169,20 @@ export function Layout({children}) {
       console.log(data.customerData)
       console.log(isLoggedIn)
       if(isLoggedIn) {
-        const user = braze.getUser()
-        console.log(data.customerData)
-        user.setCustomerIdExternalId(data.customerData.id);
-        user.setFirstName(data.customerData.firstName);
-        user.setLastName(data.customerData.lastName);
-        user.setEmail(data.customerData.emailAddress.emailAddress);
-        user.setPhoneNumber(data.customerData.phoneNumber.phoneNumber);
+        const customerId = data.customerData.id.lastIndexOf('/') + 1
+        const customerSessionKey = `ab.shopify.shopify_cart_${customerId}`;
+        const alreadySetCustomerInfo = sessionStorage.getItem(customerSessionKey);
+
+        if(!alreadySetCustomerInfo) {
+          const user = braze.getUser()
+          console.log(data.customerData)
+          braze.changeUser(data.customerData.id.substring(data.customerData.id.lastIndexOf('/') + 1))
+          user.setFirstName(data.customerData.firstName);
+          user.setLastName(data.customerData.lastName);
+          user.setEmail(data.customerData.emailAddress.emailAddress);
+          user.setPhoneNumber(data.customerData.phoneNumber.phoneNumber);
+          sessionStorage.setItem(customerSessionKey, customerId);
+        }
       }
     })
   }, [])
