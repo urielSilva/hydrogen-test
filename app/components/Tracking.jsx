@@ -58,7 +58,6 @@ export function setCartToken(cart) {
     const cartSessionKey = `ab.shopify.shopify_cart_${cartToken}`;
     const alreadySetCartToken = sessionStorage.getItem(cartSessionKey);
 
-    console.log(alreadySetCartToken)
     if (!alreadySetCartToken) {
       braze.getUser().addAlias("shopify_cart_token", `shopify_cart_${cartToken}`)
       braze.requestImmediateDataFlush();
