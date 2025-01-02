@@ -58,7 +58,6 @@ export function trackCustomerLogin(customerData, storefrontUrl) {
   const alreadySetCustomerInfo = sessionStorage.getItem(customerSessionKey);
 
   if(!alreadySetCustomerInfo) {
-    console.log(customerData)
     const user = braze.getUser()
     braze.changeUser(customerData.id.substring(customerData.id.lastIndexOf('/') + 1))
     user.setFirstName(customerData.firstName);

@@ -166,8 +166,6 @@ export function Layout({children}) {
     braze.openSession()
     
     data.isLoggedIn.then((isLoggedIn) => {
-      console.log(data.customerData)
-      console.log(isLoggedIn)
       if(isLoggedIn) {
         trackCustomerLogin(data.customerData, data.publicStoreDomain)
       }
