@@ -18,7 +18,7 @@ import tailwindCss from './styles/tailwind.css?url';
 import {PageLayout} from '~/components/PageLayout';
 import {FOOTER_QUERY, HEADER_QUERY} from '~/lib/fragments';
 import {CUSTOMER_DETAILS_QUERY} from '~/graphql/customer-account/CustomerDetailsQuery';
-
+import { trackCustomerLogin } from '~/components/Tracking';
 /**
  * This is important to avoid re-fetching root queries on sub-navigations
  * @type {ShouldRevalidateFunction}
@@ -169,20 +169,7 @@ export function Layout({children}) {
       console.log(data.customerData)
       console.log(isLoggedIn)
       if(isLoggedIn) {
-        const customerId = data.customerData.id.lastIndexOf('/') + 1
-        const customerSessionKey = `ab.shopify.shopify_cart_${customerId}`;
-        const alreadySetCustomerInfo = sessionStorage.getItem(customerSessionKey);
-
-        if(!alreadySetCustomerInfo) {
-          const user = braze.getUser()
-          console.log(data.customerData)
-          braze.changeUser(data.customerData.id.substring(data.customerData.id.lastIndexOf('/') + 1))
-          user.setFirstName(data.customerData.firstName);
-          user.setLastName(data.customerData.lastName);
-          user.setEmail(data.customerData.emailAddress.emailAddress);
-          user.setPhoneNumber(data.customerData.phoneNumber.phoneNumber);
-          sessionStorage.setItem(customerSessionKey, customerId);
-        }
+        trackCustomerLogin(data.customerData, data.publicStoreDomain)
       }
     })
   }, [])

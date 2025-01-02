@@ -51,6 +51,28 @@ export function trackCartUpdated(cart, storefrontUrl) {
   )
 }
 
+export function trackCustomerLogin(customerData, storefrontUrl) {
+  let braze = window.braze || [];
+  const customerId = customerData.id.lastIndexOf('/') + 1
+  const customerSessionKey = `ab.shopify.shopify_cart_${customerId}`;
+  const alreadySetCustomerInfo = sessionStorage.getItem(customerSessionKey);
+
+  if(!alreadySetCustomerInfo) {
+    console.log(customerData)
+    const user = braze.getUser()
+    braze.changeUser(customerData.id.substring(customerData.id.lastIndexOf('/') + 1))
+    user.setFirstName(customerData.firstName);
+    user.setLastName(customerData.lastName);
+    user.setEmail(customerData.emailAddress.emailAddress);
+    user.setPhoneNumber(customerData.phoneNumber.phoneNumber);
+    braze.logCustomEvent(
+      "shopify_account_login",
+      { source: storefrontUrl }
+    )
+    sessionStorage.setItem(customerSessionKey, customerId);
+  }
+}
+
 export function setCartToken(cart) {
   const cartId = cart.id.substring(cart.id.lastIndexOf('/') + 1) 
   const cartToken = cartId.substring(0, cartId.indexOf("?key="));
