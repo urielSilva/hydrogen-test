@@ -18,7 +18,7 @@ import tailwindCss from './styles/tailwind.css?url';
 import {PageLayout} from '~/components/PageLayout';
 import {FOOTER_QUERY, HEADER_QUERY} from '~/lib/fragments';
 import {CUSTOMER_DETAILS_QUERY} from '~/graphql/customer-account/CustomerDetailsQuery';
-
+import { trackCustomerLogin } from '~/components/Tracking';
 /**
  * This is important to avoid re-fetching root queries on sub-navigations
  * @type {ShouldRevalidateFunction}
@@ -162,25 +162,17 @@ export function Layout({children}) {
     braze.initialize(data.brazeApiKey, {
       baseUrl: data.brazeApiUrl,
       enableLogging: true,
+      allowUserSuppliedJavascript: true
     });
     braze.openSession()
     
     data.isLoggedIn.then((isLoggedIn) => {
-      console.log(data.customerData)
-      console.log(isLoggedIn)
       if(isLoggedIn) {
-        const user = braze.getUser()
-        console.log(data.customerData)
-        user.setCustomerIdExternalId(data.customerData.id);
-        user.setFirstName(data.customerData.firstName);
-        user.setLastName(data.customerData.lastName);
-        user.setEmail(data.customerData.emailAddress.emailAddress);
-        user.setPhoneNumber(data.customerData.phoneNumber.phoneNumber);
+        trackCustomerLogin(data.customerData, data.publicStoreDomain)
       }
     })
+    braze.automaticallyShowInAppMessages()
   }, [])
-
-  
 
   return (
     <html lang="en">
