@@ -162,6 +162,7 @@ export function Layout({children}) {
     braze.initialize(data.brazeApiKey, {
       baseUrl: data.brazeApiUrl,
       enableLogging: true,
+      allowUserSuppliedJavascript: true
     });
     braze.openSession()
     
@@ -170,9 +171,8 @@ export function Layout({children}) {
         trackCustomerLogin(data.customerData, data.publicStoreDomain)
       }
     })
+    braze.automaticallyShowInAppMessages()
   }, [])
-
-  
 
   return (
     <html lang="en">
